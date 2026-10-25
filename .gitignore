@@ -25,6 +25,8 @@ assets/
 *.mp3
 # Fonts: free and bought font files stay on each computer (licences), only the README is shared
 mp-studio/fonts/*
+mp-studio/models/
+mp-studio/bin/
 !mp-studio/fonts/README.md
 # Only the free (OFL) defaults are shared; every other font stays on each computer
 !mp-studio/fonts/Vazirmatn-*.ttf

@@ -183,3 +183,26 @@ Other effects named in the showcase, to build with HyperFrames/subject-cutout wh
 - Motion: fade 90 ms in/out per cue; at glass_y 1440 on full frame, word_y 1060 inside pop-out windows
 - Build: ass-motion `"caption_mode": "glass"` or `"glass-futuristic"` (`glass_size` 70 px)
 - Seen in: tested on project one copies, confidence: medium until approved on a delivered video
+
+### two of me — clone in the other chair (owner request, 2026-10-25)
+- When: the owner films the same locked-off wide shot twice, sitting in a different chair each time (a dialogue, or "two of me")
+- Look: both chairs alive the whole time — one of him talks, the other sits in the next chair listening; roles swap on the next take
+- Motion: the clone materializes with a top-down scan-line wipe (0.5 s, RGB split + a cyan scan line in the front layer); joins between
+  listening pieces sit on the take's own jump cuts, the rest get a 4-frame hologram glitch (RGB shift + alpha dip)
+- Build: `subject-cutout/rvm_matte.py` on both takes → per-project `clone.py` (listener = seated silent stretches of the other take,
+  slowed 0.7–1.0×, forward/back; speaker re-laid on top with its own matte) → clone files with the take's stem, EDL sources point to them
+- Seen in: project video mp skill set insta, confidence: medium until approved
+
+### editorial ref remake — one HyperFrames layer for everything (owner request, 2026-10-25)
+- When: the owner wants a reference reel matched closely ("same as the ref as much as possible")
+- Look: the ref's palette (forest green #1F3A2C / cream #F2EAD3 / gold #C9A45C), Persian equivalents of its type (Amiri ↔ serif,
+  Vazirmatn Black ↔ heavy sans, Noto Naskh ↔ serif captions, Instrument Serif for Latin italics), karaoke captions in a green box
+- Pieces: hook roll + timecode on a flat colour bg; real app icons struck through; prompt bar that types and turns into a status;
+  floating reels out of the hands; magazine-cover title behind the head; NLE timeline; upload card with the real file name; blooper
+  frames stamped «برداشت اشتباه»; timer → the video inside a phone frame; wall of posts with the speaker live in a tile; storyboard
+  window → zoomed entry; comment card + Claude reply; giant word + struck apps; boxed «بزرگ‌تر»; word chips; video card with real
+  app screens by chapter; comment-keyword CTA + DM reply; follow pill
+- Build: build_hf.py generates index.html (front) + hf_behind/index.html from words.json (cut timeline, remapped to the rendered
+  base's real segment lengths); alpha WebM; finish.py `front_video` / `behind_video` / `grades`; real icons from the App Store
+  (iTunes Search API), real screens via headless Edge
+- Seen in: project video mp skill set insta, confidence: medium until approved

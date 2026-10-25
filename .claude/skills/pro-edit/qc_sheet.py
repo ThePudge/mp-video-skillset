@@ -36,12 +36,15 @@ def duration_of(video: Path) -> float:
 
 
 def grab(video: Path, t: float) -> Image.Image:
-    png = subprocess.run(
-        ["ffmpeg", "-v", "error", "-ss", f"{max(0.0, t):.3f}", "-i", str(video), "-frames:v", "1",
-         "-vf", f"scale={THUMB_W}:-2", "-f", "image2pipe", "-c:v", "png", "-"],
-        capture_output=True, check=True,
-    ).stdout
-    return Image.open(io.BytesIO(png)).convert("RGB")
+    for back in (0.0, 0.25, 0.6):  # a seek at the very end can return no frame: step back and retry
+        png = subprocess.run(
+            ["ffmpeg", "-v", "error", "-ss", f"{max(0.0, t - back):.3f}", "-i", str(video), "-frames:v", "1",
+             "-vf", f"scale={THUMB_W}:-2", "-f", "image2pipe", "-c:v", "png", "-"],
+            capture_output=True, check=True,
+        ).stdout
+        if png:
+            return Image.open(io.BytesIO(png)).convert("RGB")
+    raise RuntimeError(f"no frame at {t:.2f}s in {video}")
 
 
 def sample_points(edl: dict | None, dur: float) -> list[tuple[float, str]]:

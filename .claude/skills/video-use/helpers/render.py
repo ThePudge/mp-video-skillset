@@ -38,6 +38,12 @@ except Exception:
     def auto_grade_for_clip(video, start=0.0, duration=None, verbose=False):  # type: ignore
         return "eq=contrast=1.03:saturation=0.98", {}
 
+try:  # pro-edit/hw.py: the GPU encoder (NVENC) when it works on this computer, else x264
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "pro-edit"))
+    from hw import FFMPEG, venc
+except Exception:  # noqa: BLE001
+    FFMPEG, venc = "ffmpeg", None
+
 
 # -------- Subtitle style (bold-overlay, proven at 1920×1080 and 1080×1920) --
 #
@@ -317,15 +323,16 @@ def extract_segment(
     # own rate; fall back to 24 only if it can't be probed.
     out_rate = rate if rate is not None else (probe_source_fps(source) or "24")
 
+    vcodec = (venc("draft" if draft else "preview" if preview else "inter") if venc
+              else ["-c:v", "libx264", "-preset", preset, "-crf", crf, "-pix_fmt", "yuv420p"])
     cmd = [
-        "ffmpeg", "-y",
+        FFMPEG, "-y",
         "-ss", f"{seg_start:.3f}",
         "-i", str(source),
         "-t", f"{duration:.3f}",
         "-vf", vf,
         "-af", af,
-        "-c:v", "libx264", "-preset", preset, "-crf", crf,
-        "-pix_fmt", "yuv420p", "-r", out_rate,
+        *vcodec, "-r", out_rate,
         "-c:a", "aac", "-b:a", "192k", "-ar", "48000",
         "-movflags", "+faststart",
         str(out_path),
@@ -747,7 +754,7 @@ def build_final_composite(
         audio_label, audio_codec = "[outa]", ["-c:a", "aac", "-b:a", "192k", "-ar", "48000"]
 
     filter_complex = ";".join(filter_parts)
-    video_codec = ["-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p"]
+    video_codec = venc("final") if venc else ["-c:v", "libx264", "-preset", "fast", "-crf", "18", "-pix_fmt", "yuv420p"]
     if out_label == "0:v":
         video_codec = ["-c:v", "copy"]
 

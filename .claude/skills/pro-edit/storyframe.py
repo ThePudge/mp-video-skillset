@@ -74,12 +74,17 @@ def sketch_ass(card: dict, layout: str, brand: dict, with_caption: bool) -> str:
     sk = card.get("sketch") or {}
     if sk:
         cy = (PANEL_Y.get(layout, 0) + PANEL_H // 2) if layout in PANEL_Y else 420
+        cx = W // 2
+        if sk.get("at"):  # [x, y] 0..1 of the frame: the graphic lands where it will (e.g. at the owner's hand)
+            cx, cy = int(sk["at"][0] * W), int(sk["at"][1] * H)
+            cx = min(max(cx, 300), W - 300)
+            cy = min(max(cy, 260), H - 560)
         if sk.get("kind"):
-            ev.append(f"Dialogue: 2,{T},Kind,,0,0,0,,{{\\pos({W // 2},{cy - 170})}}{sk['kind']}")
+            ev.append(f"Dialogue: 2,{T},Kind,,0,0,0,,{{\\pos({cx},{cy - 170})}}{sk['kind']}")
         if sk.get("title"):
-            ev.append(f"Dialogue: 2,{T},Card,,0,0,0,,{{\\pos({W // 2},{cy})}}{sk['title']}")
+            ev.append(f"Dialogue: 2,{T},Card,,0,0,0,,{{\\pos({cx},{cy})}}{sk['title']}")
         if sk.get("subtitle"):
-            ev.append(f"Dialogue: 2,{T},Sub,,0,0,0,,{{\\pos({W // 2},{cy + 130})}}{sk['subtitle']}")
+            ev.append(f"Dialogue: 2,{T},Sub,,0,0,0,,{{\\pos({cx},{cy + 130})}}{sk['subtitle']}")
     if card.get("move"):
         ev.append(f"Dialogue: 3,{T},Tag,,0,0,0,,▶ {card['move']}")
     if with_caption and card.get("words"):

@@ -65,6 +65,10 @@ HyperFrames usable? `npx --no-install hyperframes --version` succeeds. If not, m
 | Library of approved and learned looks to choose from | `$PE/styles.md` |
 | Text behind the speaker, dim/blur/replace background | `subject-cutout` skill |
 | One-off trims, conversions, quick effects | `kinocut` MCP tools |
+| Owner's hand gestures (point, open palm, counting, spread, raised hand) → place graphics at the hand, on the gesture | `$PE/gestures.py <edit> --edl --sheet` (MediaPipe hands, all takes in parallel) → `gestures.json` + one sheet |
+| Hardware: which FFmpeg + encoder (NVENC → Quick Sync → x264), re-checked each run | `$PE/hw.py` (render.py and finish.py use it; drafts/previews/intermediates on the GPU, the final on x264) |
+| Clean person matte on any wall (clones, full-body shots) | `subject-cutout/rvm_matte.py` (Robust Video Matting, GPU via DirectML/CUDA) |
+| A full ref remake: every UI card, caption and title as one HyperFrames layer timed to the cut's words | one Python script writes the HyperFrames page (every card and caption timed from the cut's words, remapped to the rendered base's real segment lengths) → alpha WebM layers → finish.py `"front_video"` / `"behind_video"` (+ `"grades"`); recipe in styles.md "editorial ref remake" |
 | Hooks, scripts, captions/hashtags, covers, repurposing | content skills |
 
 Use only local, free commands: no HeyGen cloud, publishing, Apify/Composio or auto-posting

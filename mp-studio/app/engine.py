@@ -35,7 +35,9 @@ def _add_cuda_dlls():
 # ---------- projects ----------
 
 def safe_name(name: str) -> str:
-    name = re.sub(r"[^\w\- ]+", "", name, flags=re.UNICODE).strip().replace(" ", "-")
+    name = re.sub(r"[^\w\- ]+", "", name, flags=re.UNICODE).strip()
+    if " " in name and not (INPUT / name).is_dir():  # new projects get dashes; a folder made by hand keeps its name
+        name = name.replace(" ", "-")
     if not name:
         raise ValueError("invalid name")
     return name[:60]
