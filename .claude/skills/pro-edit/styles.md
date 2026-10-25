@@ -186,7 +186,8 @@ Other effects named in the showcase, to build with HyperFrames/subject-cutout wh
 
 ### two of me — clone in the other chair (owner request, 2026-10-25)
 - When: the owner films the same locked-off wide shot twice, sitting in a different chair each time (a dialogue, or "two of me")
-- Look: both chairs alive the whole time — one of him talks, the other sits in the next chair listening; roles swap on the next take
+- Look: one of him talks in colour; the other is a frozen grayscale still in the next chair (owner, 2026-10-26), with live «در حال صحبت» /
+  paused «⏸ مکث» tags over the heads, a slow camera push toward the speaker, a glitch + flash + light sweep when the roles swap
 - Motion: the clone materializes with a top-down scan-line wipe (0.5 s, RGB split + a cyan scan line in the front layer); joins between
   listening pieces sit on the take's own jump cuts, the rest get a 4-frame hologram glitch (RGB shift + alpha dip)
 - Build: `subject-cutout/rvm_matte.py` on both takes → per-project `clone.py` (listener = seated silent stretches of the other take,
@@ -205,4 +206,13 @@ Other effects named in the showcase, to build with HyperFrames/subject-cutout wh
 - Build: build_hf.py generates index.html (front) + hf_behind/index.html from words.json (cut timeline, remapped to the rendered
   base's real segment lengths); alpha WebM; finish.py `front_video` / `behind_video` / `grades`; real icons from the App Store
   (iTunes Search API), real screens via headless Edge
+- Seen in: project video mp skill set insta, confidence: medium until approved
+
+### page-logo outro (owner request, 2026-10-26)
+- When: the last 3 s of a reel, right after the last word (starts ~0.45 s before the cut ends: no black gap)
+- Look: black #0B0B0B, the page's profile photo in an Instagram story ring (gradient #FEDA75 → #FA7E1E → #D62976 → #962FBF →
+  #4F5BD5) that draws itself, soft glow; name (Vazirmatn Black), handle with the real Instagram icon, bio, Follow → Following
+- Motion: photo pops (back.out 0.6 s), ring draws 0.8 s, name / handle / bio rise in steps of 0.15 s, Follow clicks at ~2 s
+- Build: per-project make_outro.py → its own HyperFrames layer (alpha WebM), finish.py front_video {"file", "t"}; SFX whoosh +
+  impact on the photo, click + ding on Follow. Use the PAGE's logo (profile photo), not the MP Studio badge
 - Seen in: project video mp skill set insta, confidence: medium until approved

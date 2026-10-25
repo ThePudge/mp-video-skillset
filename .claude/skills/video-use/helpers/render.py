@@ -322,6 +322,12 @@ def extract_segment(
     # frame rate). When called standalone with no rate, preserve this source's
     # own rate; fall back to 24 only if it can't be probed.
     out_rate = rate if rate is not None else (probe_source_fps(source) or "24")
+    # Whole frames only: the video of a segment is always rounded up to full frames while its audio is cut
+    # exactly, so across many segments the picture slowly falls behind the voice (lip sync drifts).
+    fps_f = float(Fraction(out_rate))
+    duration = max(1, round(duration * fps_f)) / fps_f
+    fade_out_start = max(0.0, duration - 0.03)
+    af = f"afade=t=in:st=0:d=0.03,afade=t=out:st={fade_out_start:.3f}:d=0.03"
 
     vcodec = (venc("draft" if draft else "preview" if preview else "inter") if venc
               else ["-c:v", "libx264", "-preset", preset, "-crf", crf, "-pix_fmt", "yuv420p"])
@@ -329,7 +335,7 @@ def extract_segment(
         FFMPEG, "-y",
         "-ss", f"{seg_start:.3f}",
         "-i", str(source),
-        "-t", f"{duration:.3f}",
+        "-t", f"{duration:.5f}",
         "-vf", vf,
         "-af", af,
         *vcodec, "-r", out_rate,

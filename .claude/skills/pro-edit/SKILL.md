@@ -68,6 +68,8 @@ HyperFrames usable? `npx --no-install hyperframes --version` succeeds. If not, m
 | Owner's hand gestures (point, open palm, counting, spread, raised hand) → place graphics at the hand, on the gesture | `$PE/gestures.py <edit> --edl --sheet` (MediaPipe hands, all takes in parallel) → `gestures.json` + one sheet |
 | Hardware: which FFmpeg + encoder (NVENC → Quick Sync → x264), re-checked each run | `$PE/hw.py` (render.py and finish.py use it; drafts/previews/intermediates on the GPU, the final on x264) |
 | Clean person matte on any wall (clones, full-body shots) | `subject-cutout/rvm_matte.py` (Robust Video Matting, GPU via DirectML/CUDA) |
+| Lip sync check against the RAW takes (run on the cut and on the final before delivering) | `$PE/avsync.py <edit> <video>` → picture vs sound offset per take, verdict (≤ 1 frame = in sync) |
+| Recolour only the wall (person keeps their colour), camera push toward a speaker, slide the speaker down for a panel, an outro layer at its own time | finish.py cut-out `"hue"` + `"wipe"`, zoom `"center"`, `"shift"`, `"front_video": [main, {"file", "t"}]` (docstring) |
 | A full ref remake: every UI card, caption and title as one HyperFrames layer timed to the cut's words | one Python script writes the HyperFrames page (every card and caption timed from the cut's words, remapped to the rendered base's real segment lengths) → alpha WebM layers → finish.py `"front_video"` / `"behind_video"` (+ `"grades"`); recipe in styles.md "editorial ref remake" |
 | Hooks, scripts, captions/hashtags, covers, repurposing | content skills |
 

@@ -14,10 +14,14 @@ fx.json (times on the OUTPUT timeline, seconds):
   "matte": {"type": "bluekey", "lo": 35, "hi": 60},     // blueness = B-(R+G)/2: >=hi is wall, <=lo is person
      // or {"type": "video", "file": "matte/matte.mp4"}: AI person matte (any wall), white = person, same timeline
   "cutouts": [{"t0": 10.8, "t1": 15.4, "brightness": -0.12, "saturation": 0.8, "blur": 0},
-              {"t0": 0, "t1": 2.4, "color": "0x1F3A2C"}],   // color = flat background instead
+              {"t0": 0, "t1": 2.4, "color": "0x1F3A2C"},    // color = flat background instead
+              {"t0": 13.6, "t1": 23.8, "hue": 150, "wipe": {"dir": "rtl", "d": 0.6}}],  // recolour the wall only, sweeping in
+     // cut-outs must not overlap: split a long treatment around other windows (no wipe on the later pieces)
+  "shift": [{"t0": 76.9, "t1": 90.7, "dy": 300, "in": 0.45, "color": "0x1F3A2C"}],  // slide the picture down (panel room)
   "zoom_center": [0.5, 0.42],
   "zooms": [{"t0": 0, "t1": 10.6, "z0": 1.0, "z1": 1.1, "ease": "inout"},
-            {"t0": 14.1, "t1": 14.25, "z0": 1.0, "z1": 1.18, "ease": "out", "hold_to": 15.4}],
+            {"t0": 14.1, "t1": 14.25, "z0": 1.0, "z1": 1.18, "ease": "out", "hold_to": 15.4},
+            {"t0": 24.0, "t1": 33.0, "z0": 1.0, "z1": 1.09, "center": [0.36, 0.42]}],  // per-zoom centre (push toward a speaker)
   "layout": {"type": "split", "panel": "../panel/panel.mp4", "panel_h": 768, "crop_y": 400},
      // or pop-out window (head breaks out of a rounded window, dark dotted canvas above, needs the matte):
      // {"type": "popout", "windows": [[5.0, 8.7], [18.2, 23.0]], "scale": 0.9, "box_y": 1240,
@@ -29,6 +33,7 @@ fx.json (times on the OUTPUT timeline, seconds):
              {"t0": 36.7, "t1": 41.8, "look": "dark", "wipe": true, "in": 0.7}], // wipe = grows from the top down
   "behind_video": "../hf_behind/renders/behind.webm",  // alpha video under the speaker inside every cut-out window
   "front_video": "../hf/renders/front.webm",           // alpha video over everything (HyperFrames cards + captions)
+     // or a list, later ones on top: ["../hf/renders/front.webm", {"file": "../hf_outro/renders/outro.webm", "t": 108.2}]
   "flash": [10.76, 25.7], "glitch": [[28.05, 28.2]], "vignette": true, "grain": 5,
   "voice": {"highpass": 80, "compress": true},
   "music": {"file": "../../../assets/music/bed.wav", "db": -22, "duck": true},
@@ -102,6 +107,16 @@ def alpha_input(path):
     return (["-c:v", "libvpx-vp9", "-i", p] if p.lower().endswith(".webm") else ["-i", p])
 
 
+def mix_expr(a, b, d, d_out, wipe=None):
+    """blend all_expr: A = original, B = treated; B grows in at a (fade, or a wipe that moves from an edge) and
+    leaves at b. Both inputs are the same frames, so nothing can slip out of sync (no generated mask clock)."""
+    p = f"clip((T-{a:.3f})/{max(d, 1e-3)},0,1)"
+    out = f"(1-clip((T-{b:.3f})/{max(d_out, 1e-3)},0,1))"
+    edge = {True: f"lt(Y,H*{p})", "down": f"lt(Y,H*{p})", "rtl": f"gt(X,W*(1-{p}))", "ltr": f"lt(X,W*{p})"}
+    m = f"{edge[wipe]}*{out}" if wipe else f"{p}*{out}"
+    return f"A*(1-{m})+B*{m}"
+
+
 if bvid and ncut:
     bidx = inputs.count("-i")
     inputs += alpha_input(bvid)
@@ -118,12 +133,19 @@ for i, (kind, t0, t1, c) in enumerate(parts):
     bg = [f"eq=brightness={c.get('brightness', -0.15)}:saturation={c.get('saturation', 0.8)}"]
     if c.get("color"):  # flat background colour behind the speaker (hook / title moments)
         bg = [f"drawbox=x=0:y=0:w=iw:h=ih:color={c['color']}:t=fill"]
+    elif c.get("hue") is not None:  # recolour the wall only (e.g. blue → warm), the person keeps their colour
+        bg = [f"hue=h={c['hue']}:s={c.get('hue_s', 1.0)}", f"eq=brightness={c.get('brightness', 0)}"]
     elif c.get("blur"):
         bg.append(f"gblur=sigma={c['blur']}")
     if has_behind:  # ASS times are absolute: shift to the window, burn, shift back
         bg.append(f"setpts=PTS+{t0:.3f}/TB,subtitles={behind}:fontsdir={fonts},setpts=PTS-STARTPTS")
     g.append(f"{trim},format=rgb24,split=3[b{i}][f{i}][k{i}];")
-    g.append(f"[b{i}]{','.join(bg)}[bg{i}];")
+    if c.get("wipe"):  # the treated background sweeps in from an edge (rtl / ltr / down) instead of cutting in
+        w = c["wipe"]
+        g.append(f"[b{i}]split[bo{i}][bt{i}];[bt{i}]{','.join(bg)},format=gbrp[btt{i}];[bo{i}]format=gbrp[boo{i}];"
+                 f"[boo{i}][btt{i}]blend=all_expr='{mix_expr(0.0, 1e6, w.get('d', 0.6), 0.1, w.get('dir', 'rtl'))}',format=rgb24[bg{i}];")
+    else:
+        g.append(f"[b{i}]{','.join(bg)}[bg{i}];")
     if i in bwin:
         g.append(f"[bvs{kcut}]trim=start={t0:.3f}:end={t1:.3f},setpts=PTS-STARTPTS[bv{i}];"
                  f"[bg{i}][bv{i}]overlay=format=auto:eof_action=pass,format=rgb24[bgx{i}];")
@@ -185,15 +207,8 @@ for k, gr in enumerate(spec.get("grades", [])):
             g.append(f"[{lab}]{look},format=yuv420p[{lab}g];")
             return f"{lab}g"
         a, b = max(0.0, t0 - s0), max(0.0, t1 - s0)  # window-local times (frame rounding can put s0 a hair past t0)
-        mask = f"color=white:s={W}x{H}:r={fps_s}:d={s1 - s0:.3f}"
-        if gr.get("wipe"):  # the graded part grows from the top edge down
-            mask = (f"{mask}[{lab}w];color=black:s={W}x{H}:r={fps_s}:d={s1 - s0:.3f}[{lab}k];"
-                    f"[{lab}w][{lab}k]overlay=x=0:y='{H}*clip((t-{a:.3f})/{d}\\,0\\,1)':eval=frame")
-        else:
-            mask += f",fade=t=in:st={a:.3f}:d={d}"
-        mask += f",fade=t=out:st={b:.3f}:d={d_out}"
-        g.append(f"[{lab}]format=gbrp,split[{lab}a][{lab}b];[{lab}b]{look},format=gbrp[{lab}l];{mask},format=gbrp[{lab}m];"
-                 f"[{lab}a][{lab}l][{lab}m]maskedmerge,format=yuv420p[{lab}g];")
+        g.append(f"[{lab}]format=gbrp,split[{lab}a][{lab}b];[{lab}b]{look},format=gbrp[{lab}l];"
+                 f"[{lab}a][{lab}l]blend=all_expr='{mix_expr(a, b, d, d_out, gr.get('wipe'))}',format=yuv420p[{lab}g];")
         return f"{lab}g"
 
     gcur = windowed(gcur, [(t0, t1 + d_out)], grade, f"gr{k}")
@@ -205,17 +220,19 @@ EASE = {"linear": "{p}", "inout": "({p})*({p})*(3-2*({p}))", "out": "1-(1-({p}))
         "in": "({p})*({p})"}
 zooms = sorted(spec.get("zooms", []), key=lambda z: z["t0"])
 cur = "cv2" if gcur != "cv" else "cv"
-if zooms:
+groups = {}  # zooms grouped by their centre ("center": [x, y] per zoom, else zoom_center)
+for z in zooms:
+    groups.setdefault(tuple(z.get("center", spec.get("zoom_center", [0.5, 0.42]))), []).append(z)
+for gi, ((cx, cy), zs) in enumerate(groups.items()):
     expr = "1"
-    for z in reversed(zooms):
+    for z in reversed(zs):
         p = f"(it-{z['t0']})/{max(z['t1'] - z['t0'], 1e-3)}"
         ramp = f"{z['z0']}+({z['z1']}-{z['z0']})*({EASE[z.get('ease', 'inout')].format(p=p)})"
         expr = f"if(between(it,{z['t0']},{z['t1']}),{ramp},{expr})"
         if z.get("hold_to"):
             expr = f"if(between(it,{z['t1']},{z['hold_to']}),{z['z1']},{expr})"
-    cx, cy = spec.get("zoom_center", [0.5, 0.42])
 
-    def zoom(lab, s0, s1, i):
+    def zoom(lab, s0, s1, i, expr=expr, cx=cx, cy=cy):
         # 2x upscale first: zoompan crops on whole pixels, so this halves the visible stepping
         e = expr.replace("it", f"(it+{s0:.4f})")  # window-local clock → output time
         g.append(f"[{lab}]scale={2 * W}:{2 * H}:flags=bicubic,zoompan=z='{e}':x='(iw-iw/zoom)*{cx}':"
@@ -223,7 +240,20 @@ if zooms:
         return f"{lab}z"
 
     # only where a zoom is active (the rest is zoom 1 = untouched), so long videos stay fast
-    cur = windowed(cur, [(z["t0"], max(z["t1"], z.get("hold_to") or 0) + 1 / FPS) for z in zooms], zoom, "zv")
+    cur = windowed(cur, [(z["t0"], max(z["t1"], z.get("hold_to") or 0) + 1 / FPS) for z in zs], zoom, f"zv{gi}")
+
+# ---------- 2b. shift the picture down (room for a panel above the face); pad + crop of the same frames ----------
+for k, sh in enumerate(spec.get("shift", [])):
+    dy, a0, a1, d = int(sh["dy"]) // 2 * 2, sh["t0"], sh["t1"], sh.get("in", 0.45)
+
+    def shift(lab, s0, s1, i, dy=dy, a0=a0, a1=a1, d=d, col=sh.get("color", "0x1F3A2C")):
+        a, b = max(0.0, a0 - s0), max(0.0, a1 - s0)
+        p = f"clip((t-{a:.3f})/{d},0,1)*(1-clip((t-{b:.3f})/{d},0,1))"
+        e = EASE["inout"].format(p=p)
+        g.append(f"[{lab}]pad=w={W}:h={H + dy}:x=0:y={dy}:color={col},crop=w={W}:h={H}:x=0:y='{dy}*(1-({e}))'[{lab}s];")
+        return f"{lab}s"
+
+    cur = windowed(cur, [(a0, a1 + d)], shift, f"sh{k}")
 
 # ---------- 3. VFX ----------
 # ---------- 2a. pop-out window layout: speaker in a rounded window, head breaking out on top ----------
@@ -346,12 +376,18 @@ if spec.get("glass", True) and (E / "glass_mask.ass").exists():
     cur = "gl"
 front = spec.get("front", "master.ass")
 sub = f"subtitles={front}:fontsdir={fonts}" if (E / front).exists() else "null"
-fvid = spec.get("front_video")  # alpha video over everything (HyperFrames cards, UI, captions)
-if fvid:
-    fidx = inputs.count("-i")
-    inputs += alpha_input(fvid)
-    g.append(f"[{cur}]{sub},format=yuv420p[vs];[{fidx}:v]format=yuva420p[fv];"
-             f"[vs][fv]overlay=format=auto:eof_action=pass,format=yuv420p[vout];")
+fvid = spec.get("front_video")  # alpha video(s) over everything (HyperFrames cards, UI, captions); later ones on top
+if fvid:  # "file.webm", or a list of files / {"file", "t"} (t = where a short clip starts, e.g. an outro)
+    lab = "vs"
+    g.append(f"[{cur}]{sub},format=yuv420p[vs];")
+    for j, fv in enumerate(fvid if isinstance(fvid, list) else [fvid]):
+        fv = {"file": fv} if isinstance(fv, str) else fv
+        fidx = inputs.count("-i")
+        inputs += alpha_input(fv["file"])
+        shift_t = f",setpts=PTS+{fv['t']:.3f}/TB" if fv.get("t") else ""
+        g.append(f"[{fidx}:v]format=yuva420p{shift_t}[fv{j}];[{lab}][fv{j}]overlay=format=auto:eof_action=pass[fo{j}];")
+        lab = f"fo{j}"
+    g.append(f"[{lab}]format=yuv420p[vout];")
 else:
     g.append(f"[{cur}]{sub},format=yuv420p[vout];")
 
@@ -365,7 +401,7 @@ mix = ["[vo]"]
 mu = spec.get("music")
 if mu:
     midx = inputs.count("-i")
-    inputs += ["-i", str((E / mu["file"]).resolve())]
+    inputs += ["-stream_loop", "-1", "-i", str((E / mu["file"]).resolve())]  # loop a short bed to the end
     g.append(f"[{midx}:a]aresample=48000,aformat=channel_layouts=stereo,volume={mu.get('db', -22)}dB,"
              f"atrim=0:{dur:.3f}[mus];")
     if mu.get("duck", True):
