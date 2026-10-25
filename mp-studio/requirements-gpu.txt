@@ -1,0 +1,3 @@
+# CUDA 12 runtime for faster-whisper on NVIDIA GPUs (installed only when nvidia-smi is found)
+nvidia-cublas-cu12
+nvidia-cudnn-cu12==9.*

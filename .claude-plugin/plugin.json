@@ -1,0 +1,35 @@
+{
+  "name": "mp-claude-edit-skillset",
+  "displayName": "MP Claude Edit Skillset",
+  "version": "1.0.0",
+  "description": "Edit raw talking-to-camera videos (Persian and English) like a pro editor with Claude: transcript cutting, punch-ins, captions, music, HyperFrames/Remotion motion graphics, text behind the speaker, one-image QC. Local and token-lean. Windows.",
+  "author": {
+    "name": "mohammadpour.bi",
+    "url": "https://instagram.com/mohammadpour.bi"
+  },
+  "repository": "https://github.com/ThePudge/video-editor",
+  "keywords": [
+    "video",
+    "editing",
+    "reels",
+    "captions",
+    "persian",
+    "motion-graphics",
+    "hyperframes",
+    "remotion",
+    "ffmpeg"
+  ],
+  "skills": [
+    "./.claude/skills/"
+  ],
+  "mcpServers": {
+    "kinocut": {
+      "command": "${CLAUDE_PLUGIN_ROOT}/.venv/Scripts/kino.exe",
+      "args": [
+        "--mcp"
+      ]
+    }
+  },
+  "homepage": "https://instagram.com/mohammadpour.bi",
+  "license": "MIT"
+}

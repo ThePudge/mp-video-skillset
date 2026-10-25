@@ -1,0 +1,39 @@
+# Environments
+.claude/launch.json
+.claude/settings.local.json
+# Remotion skills are fetched on first run (no license file to redistribute them)
+.claude/skills/remotion-*/
+# HyperFrames skills are fetched on first run too (kept current with the CLI that npx downloads)
+.claude/skills/hyperframes*/
+.claude/skills/media-use/
+.claude/skills/gsap-*/
+.env
+.venv/
+mp-studio/tools/.venv/
+__pycache__/
+*.pyc
+
+# Media and generated files stay on each computer
+input/
+work/
+output/
+assets/
+*.mp4
+*.mov
+*.mkv
+*.wav
+*.mp3
+# Fonts: free and bought font files stay on each computer (licences), only the README is shared
+mp-studio/fonts/*
+!mp-studio/fonts/README.md
+# Only the free (OFL) defaults are shared; every other font stays on each computer
+!mp-studio/fonts/Vazirmatn-*.ttf
+!mp-studio/fonts/Lalezar-Regular.ttf
+!mp-studio/fonts/OFL-*.txt
+*.webm
+*.m4v
+# Learning material stays on each computer; LOG.md and skill changes are shared
+mp-studio/learn/inbox/
+mp-studio/learn/done/
+# Launcher build leftovers
+*.pdb

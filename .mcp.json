@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "kinocut": {
+      "command": ".venv/Scripts/kino.exe",
+      "args": ["--mcp"]
+    }
+  }
+}

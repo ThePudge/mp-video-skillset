@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Video Editor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <a href="/studio/" class="btn ghost" title="Back to MP Studio">← MP Studio</a>
+  <strong class="brand">برش متنی</strong>
+  <select id="projectSelect"></select>
+  <button id="newProject" class="ghost">+ New project</button>
+  <span class="spacer"></span>
+  <span id="jobBar" hidden><span id="jobText"></span><progress id="jobProgress" max="1"></progress></span>
+</header>
+
+<main id="empty" hidden>
+  <div class="empty">
+    <h2>No project yet</h2>
+    <button id="newProject2">Create a project</button>
+  </div>
+</main>
+
+<main id="workspace" hidden>
+  <aside>
+    <section>
+      <h3>Clips</h3>
+      <ul id="clipList" class="list"></ul>
+      <label class="drop" id="drop">
+        <input type="file" id="fileInput" accept="video/*" multiple hidden>
+        Drop raw videos here or click to add
+      </label>
+      <div class="row">
+        <select id="model" title="Whisper model">
+          <option value="small">small (fast)</option>
+          <option value="medium" selected>medium</option>
+          <option value="large-v3">large-v3 (best)</option>
+        </select>
+        <select id="language" title="Spoken language">
+          <option value="fa">Persian</option>
+          <option value="en">English</option>
+          <option value="">Auto</option>
+        </select>
+      </div>
+      <button id="processBtn" class="wide">Prepare &amp; transcribe</button>
+    </section>
+
+    <section>
+      <h3>Render</h3>
+      <div class="row">
+        <select id="aspect">
+          <option value="original">Original frame</option>
+          <option value="9:16">9:16 Reels / Shorts</option>
+          <option value="16:9">16:9 YouTube</option>
+          <option value="1:1">1:1 Square</option>
+        </select>
+      </div>
+      <label class="check"><input type="checkbox" id="loudnorm" checked> Normalize loudness</label>
+      <label class="check"><input type="checkbox" id="denoise"> Reduce background noise</label>
+      <button id="renderBtn" class="wide primary">Render edit</button>
+    </section>
+
+    <section>
+      <h3>Outputs</h3>
+      <ul id="outputList" class="list"></ul>
+    </section>
+  </aside>
+
+  <section class="editor">
+    <div class="player">
+      <video id="video" controls preload="metadata"></video>
+      <div class="transport">
+        <button id="playEdit" class="primary">▶ Play edit</button>
+        <span id="stats"></span>
+        <span class="spacer"></span>
+        <label title="Pauses longer than this are cut">Max pause
+          <input type="range" id="maxPause" min="0.2" max="2" step="0.1"><output id="maxPauseVal"></output>
+        </label>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button id="removeSel" title="Delete / Backspace">Cut selection</button>
+      <button id="restoreSel">Restore selection</button>
+      <button id="undoBtn" title="Ctrl+Z">Undo</button>
+      <span class="spacer"></span>
+      <a id="srtLink" class="ghost btn" download>Download SRT</a>
+    </div>
+    <div id="transcript" class="transcript"></div>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>

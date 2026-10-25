@@ -1,0 +1,15 @@
+{
+  "name": "mp-edit",
+  "description": "MP Claude Edit Skillset: a local, token-lean video editing toolkit for Claude Code.",
+  "owner": {
+    "name": "mohammadpour.bi",
+    "url": "https://instagram.com/mohammadpour.bi"
+  },
+  "plugins": [
+    {
+      "name": "mp-claude-edit-skillset",
+      "source": "./",
+      "description": "Edit raw talking-to-camera videos like a pro editor with Claude: cuts, punch-ins, captions, music, motion graphics, text behind the speaker, QC."
+    }
+  ]
+}

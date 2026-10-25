@@ -1,0 +1,28 @@
+fastapi>=0.115
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+faster-whisper>=1.2,<1.3
+# faster-whisper 1.2.x passes args that PyAV 16+ removed
+av<16
+
+# video-use skill helpers (.claude/skills/video-use/helpers)
+requests
+# Reference videos from links (motion-reference/ref_sheets.py)
+yt-dlp
+librosa
+matplotlib
+pillow
+
+# Kinocut MCP server (.mcp.json)
+kinocut>=1.16
+
+# Better edits: AI cutout for any background, face tracking, voice/SFX audio processing
+rembg
+mediapipe
+pedalboard
+noisereduce
+
+# GPU for the person matte (subject-cutout/matte.py picks the fastest device per computer):
+# DirectML runs on any DirectX 12 GPU (Intel, AMD, NVIDIA). setup swaps it in for the CPU-only
+# onnxruntime that faster-whisper pulls in (same module, CPU path included, so Whisper's VAD keeps working).
+onnxruntime-directml; sys_platform == "win32"

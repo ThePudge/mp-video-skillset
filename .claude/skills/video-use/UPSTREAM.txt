@@ -1,0 +1,10 @@
+upstream: https://github.com/browser-use/video-use @ 43cfc56 (MIT). Local change: helpers/transcribe.py falls back to local faster-whisper when ELEVENLABS_API_KEY is not set.
+Local change: helpers/render.py decodes .webm overlays with libvpx-vp9 so their alpha channel survives.
+Local change: helpers/render.py EDL extras: "aspect" (center crop), per-range "zoom"/"zoom_y" (punch-ins),
+  "subtitle_style" + "fonts_dir" (Persian caption font), "music" (looped bed ducked under speech).
+Local change: helpers/render.py final writes tag H.264 limited range + BT.709 (DELIVERY_TAGS, no re-encode).
+Local change: helpers/render.py subtitle/font paths use forward slashes (backslashes broke captions on Windows).
+Local change: SKILL.md Setup names the plugin root (${CLAUDE_PLUGIN_ROOT}) for helper paths.
+Local change: SKILL.md points to the subject-cutout skill for text-behind-subject / background effects.
+Local change: helpers/render.py skips the final copy when -o is the base file itself (base_preview.mp4 / base.mp4).
+Local change: helpers/render.py subtitle force_style Encoding=-1 so libass lays Persian/Arabic lines right to left.

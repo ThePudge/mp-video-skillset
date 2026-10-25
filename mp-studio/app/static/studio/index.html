@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MP Studio</title>
+<meta name="author" content="mohammadpour.bi">
+<link rel="stylesheet" href="studio.css">
+<link rel="icon" type="image/png" href="mp.png">
+</head>
+<body>
+<header>
+  <div class="logo"><span class="mark">MP</span><div><b>MP Studio</b><a id="creator" href="https://instagram.com/mohammadpour.bi" target="_blank" rel="noopener">by @mohammadpour.bi</a></div></div>
+  <select id="project" title="پروژه"></select>
+  <button id="newProject" class="ghost">+ پروژه جدید</button>
+  <span class="spacer"></span>
+  <span id="job" hidden><span id="jobText"></span><progress id="jobBar" max="1"></progress></span>
+</header>
+
+<nav id="tabs">
+  <button data-tab="home" class="on">خانه و نصب</button>
+  <button data-tab="project">پروژه</button>
+  <button data-tab="brand">برند و استایل</button>
+  <button data-tab="voice">صدا</button>
+  <button data-tab="review">بازبینی <span id="reviewDot" class="dot" hidden></span></button>
+  <button data-tab="outputs">خروجی‌ها</button>
+  <button data-tab="learn">آموزش</button>
+  <button data-tab="guide">راهنما</button>
+  <a href="/index.html" class="tablink">برش متنی ↗</a>
+</nav>
+
+<main>
+  <!-- HOME / SETUP -->
+  <section id="tab-home" class="tab on">
+    <div class="card">
+      <h2>وضعیت سیستم</h2>
+      <ul id="health" class="checks"></ul>
+      <div class="row"><button id="setupBtn" class="primary">نصب / تعمیر خودکار</button><button id="refreshHealth" class="ghost">بررسی دوباره</button></div>
+      <pre id="setupLog" hidden></pre>
+    </div>
+    <div class="card">
+      <h2>چطور کار می‌کند</h2>
+      <ol class="steps">
+        <li>در <b>برند و استایل</b> یک بار پیج، رنگ‌ها، فونت‌ها و سبک کارت‌ها را تنظیم کن.</li>
+        <li>در <b>پروژه</b> ویدیو، ویس یا رفرنس‌ها را بکش و رها کن و هدف ویدیو را بنویس.</li>
+        <li>حالت ادیت را انتخاب کن: <b>حرفه‌ای (Claude)</b> یا <b>سبک (هوش مصنوعی ساده‌تر/رایگان)</b>، بعد دکمه‌ی ذخیره را بزن و جمله‌ای که نشان می‌دهد را برای هوش مصنوعی بفرست. (تب <b>راهنما</b>)</li>
+        <li>اول <b>استوری‌بورد</b> می‌آید (چند ثانیه، بدون رندر): در <b>بازبینی</b> متن برنامه و تصویر و صدای هر صحنه را ببین، یادداشت بگذار یا تأیید کن. رندر سنگین فقط بعد از تأیید.</li>
+        <li>بعد از تأیید، ویدیوی نهایی در <b>خروجی‌ها</b> آماده می‌شود.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- PROJECT -->
+  <section id="tab-project" class="tab">
+    <div class="card">
+      <h2>چه کسی ادیت کند؟</h2>
+      <div class="modes">
+        <label class="mode"><input type="radio" name="mode" value="pro" checked>
+          <b>حرفه‌ای — Claude</b>
+          <small>قدرت کامل: برنامه و استوری‌بورد کامل، پنل تصویرسازی متحرک، پنجره‌ی پاپ‌اوت، متن پشت سر، افکت‌های عمق، کنترل کیفیت.
+          نیاز به <b>Claude Code</b> (اشتراک Pro/Max یا کلید API).</small></label>
+        <label class="mode"><input type="radio" name="mode" value="lite">
+          <b>سبک — هوش مصنوعی ساده‌تر یا رایگان</b>
+          <small>برای OpenCode، Qwen Code، Gemini CLI، Kilo و… — دو دستور؛ برش مکث‌ها، زیرنویس برند با کلمه‌ی کلیدی، زوم، موزیک، افکت صوتی و کارت CTA.
+          بدون پنل و افکت‌های سنگین. هوش مصنوعی فقط املای زیرنویس را درست می‌کند. راهنما: تب <b>راهنما</b>.</small></label>
+      </div>
+      <p class="muted">هر دو حالت اول <b>استوری‌بورد</b> را در بازبینی نشان می‌دهند (چند ثانیه، بدون رندر) و فقط بعد از تأیید تو رندر می‌کنند.</p>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>فایل‌ها</h2>
+        <div class="drops">
+          <label class="drop" data-kind="footage"><input type="file" multiple hidden accept="video/*"><b>ویدیوی خام</b><small>همه تیک‌ها</small><ul></ul></label>
+          <label class="drop" data-kind="voice"><input type="file" multiple hidden accept="audio/*,.ogg,.opus,.m4a"><b>ویس</b><small>برای ویدیوی تمام‌موشن</small><ul></ul></label>
+          <label class="drop" data-kind="ref"><input type="file" multiple hidden accept="video/*,image/*"><b>رفرنس</b><small>ویدیوهایی که سبکشان را می‌خواهی</small><ul></ul></label>
+          <label class="drop" data-kind="asset"><input type="file" multiple hidden><b>آیکن، اسکرین‌شات، پست‌ها</b><small>چیزهای واقعی برای گرافیک</small><ul></ul></label>
+          <label class="drop" data-kind="music"><input type="file" multiple hidden accept="audio/*"><b>موزیک</b><small>اختیاری</small><ul></ul></label>
+        </div>
+        <div class="row"><input id="refLink" placeholder="لینک ریلز / یوتیوب برای رفرنس" dir="ltr"><button id="addLink">افزودن لینک</button></div>
+        <ul id="links" class="mini"></ul>
+        <div class="row"><button class="ghost" data-open="input">باز کردن پوشه</button></div>
+        <h3>ترتیب و نقش کلیپ‌ها</h3>
+        <p class="muted">بکش و رها کن تا ترتیب عوض شود. <b>اصلی</b> = صحبت، به همین ترتیب · <b>تکرار</b> = یک بار دیگر همان کلیپ بالایی (بهترینش می‌ماند) · <b>بی‌رول</b> = تصویر کمکی (اسکرین‌ریکورد، محصول…) که روی صحبت پخش می‌شود.</p>
+        <ol id="clipOrder" class="clips"></ol>
+      </div>
+      <div class="card">
+        <h2>هدف ویدیو</h2>
+        <label>موضوع<input id="b_topic" placeholder="مثلاً: ۳ ترفند ادیت با هوش مصنوعی"></label>
+        <label>هدف<select id="b_goal"><option value="">—</option><option>فالوور جدید</option><option>فروش / لید</option><option>آموزش</option><option>معرفی محصول</option><option>برند شخصی</option></select></label>
+        <label>CTA (کلمه کامنت یا کار مخاطب)<input id="b_cta" placeholder="مثلاً: کامنت «ادیت»"></label>
+        <label>مدت<select id="b_length"><option value="">پیش‌فرض برند</option><option>15-30</option><option>30-45</option><option>45-60</option><option>60-90</option></select></label>
+        <label>نوع<select id="b_kind"><option value="talking">ویدیوی صحبت من</option><option value="voice">فقط ویس → تمام‌موشن</option><option value="mixed">ترکیبی</option></select></label>
+        <label>توضیحات برای Claude<textarea id="b_notes" rows="4" placeholder="هر چیزی که باید بداند…"></textarea></label>
+      </div>
+    </div>
+  </section>
+
+  <!-- BRAND & STYLE -->
+  <section id="tab-brand" class="tab">
+    <div class="card scopeBar">
+      <b>این تنظیمات برای:</b>
+      <div class="seg" id="scope"><button data-s="brand">همه‌ی پروژه‌ها (پیش‌فرض برند)</button><button data-s="project">فقط پروژه‌ی «<span class="pname"></span>»</button></div>
+      <span id="scopeNote" class="muted grow"></span>
+      <button id="resetProject" class="ghost" hidden>برگرد به پیش‌فرض برند</button>
+    </div>
+    <div class="grid2">
+      <div class="card">
+        <h2>برند شما</h2>
+        <div class="avatarRow"><div class="pic round" id="avatarBox"><img id="avatar" alt="" hidden><span>عکس</span></div><label class="btn">آپلود عکس پروفایل<input id="avatarFile" type="file" accept="image/*" hidden></label><div class="pic" id="logoBox"><img id="logo" alt="" hidden><span>لوگو</span></div><label class="btn">آپلود لوگو<input id="logoFile" type="file" accept="image/*" hidden></label></div><p id="picError" class="err" hidden></p>
+        <label>پیج اینستاگرام<input id="s_page" placeholder="@your.page" dir="ltr"></label>
+        <label>نام<input id="s_name"></label>
+        <label>بیو<input id="s_bio"></label>
+        <label>CTA همیشگی<input id="s_cta" placeholder="مثلاً: فالو کن برای ترفندهای بیشتر"></label>
+        <div class="colors">
+          <label>اصلی<input type="color" id="c_accent"></label>
+          <label>دوم<input type="color" id="c_accent2"></label>
+          <label>متن<input type="color" id="c_text"></label>
+          <label>تیره<input type="color" id="c_dark"></label>
+        </div>
+      </div>
+      <div class="card">
+        <h2>استایل ویدیو</h2>
+        <h3>تم</h3>
+        <div class="choices" id="theme"></div>
+        <h3>سبک کارت‌ها</h3>
+        <div class="choices" id="card_style"></div>
+        <h3>حس حرکت</h3>
+        <div class="choices" id="motion_feel"></div>
+        <h3>زیرنویس</h3>
+        <div class="choices" id="captions"></div>
+        <h3>پاک‌سازی صدا در هر ادیت</h3>
+        <p class="muted small">برای خاموش کردن: «بدون پاک‌سازی». تنظیم دقیق‌تر (اسلایدرها) در تب «صدا».</p>
+        <div class="choices" id="voice_preset"></div>
+        <div class="grid3">
+          <label>ریتم<select id="s_pace"><option value="tight">تند (ریلز)</option><option value="natural">طبیعی</option></select></label>
+          <label>موزیک در پایان<select id="s_music_end"><option value="level">تا آخر ثابت</option><option value="fade">قبل از CTA محو</option></select></label>
+          <label>زبان<select id="s_language"><option value="fa">فارسی</option><option value="en">English</option><option value="mixed">ترکیبی</option></select></label>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>فونت‌ها</h2>
+      <p class="muted">فونت‌های خودت را آپلود کن (ttf، otf یا zip). Claude نسخه‌ها را مرتب می‌کند و برای هر کدام نقش پیشنهاد می‌دهد. فونت‌های شما فقط روی همین کامپیوتر می‌مانند.</p>
+      <div class="row"><label class="btn primary">آپلود فونت<input id="fontFiles" type="file" multiple accept=".ttf,.otf,.zip" hidden></label>
+        <input id="sample" value="ادیت حرفه‌ای با ۳ ترفند" class="grow"><button class="ghost" data-open="fonts">پوشه فونت‌ها</button></div>
+      <div class="roles">
+        <label>زیرنویس<select id="f_captions"></select></label>
+        <label>کلمه کلیدی<select id="f_keyword"></select></label>
+        <label>تیتر و عدد<select id="f_display"></select></label>
+        <label>کلمه متضاد<select id="f_contrast"></select></label>
+      </div>
+      <div id="fontPreview" class="fontPreview"></div>
+      <div id="fontList" class="fontList"></div>
+    </div>
+    <p class="saved" id="savedNote" hidden>ذخیره شد ✓</p>
+  </section>
+
+  <!-- VOICE -->
+  <section id="tab-voice" class="tab">
+    <div class="grid2">
+      <div class="card">
+        <h2>پاک‌سازی صدا</h2>
+        <p class="muted">نویز اتاق، وزوز برق، صدای کلیک دهان و «س»های تیز حذف می‌شه؛ صدا گرم‌تر، شفاف‌تر و هم‌سطح می‌شه. تصویر دست نمی‌خوره.</p>
+        <label>فایل<select id="v_file"></select></label>
+        <h3>حالت</h3>
+        <div class="choices" id="v_preset"></div>
+        <div class="sliders">
+          <label>کاهش نویز <output id="o_denoise"></output><input type="range" id="v_denoise" min="0" max="1" step="0.05"></label>
+          <label>حذف «س» تیز <output id="o_deess"></output><input type="range" id="v_deess" min="0" max="1" step="0.05"></label>
+          <label>شفافیت (dB) <output id="o_presence"></output><input type="range" id="v_presence" min="0" max="5" step="0.5"></label>
+          <label>گرمی (dB) <output id="o_warmth"></output><input type="range" id="v_warmth" min="0" max="5" step="0.5"></label>
+          <label>فشرده‌سازی <output id="o_compress"></output><input type="range" id="v_compress" min="0" max="1" step="0.05"></label>
+          <label>سکوت بین کلمه‌ها <output id="o_gate"></output><input type="range" id="v_gate" min="0" max="1" step="0.05"></label>
+        </div>
+        <div class="grid3">
+          <label>وزوز برق<select id="v_dehum"><option value="auto">خودکار</option><option value="50">۵۰ هرتز</option><option value="60">۶۰ هرتز</option><option value="off">خاموش</option></select></label>
+          <label>بلندی<select id="v_lufs"><option value="-16">۱۶- (فقط صدا)</option><option value="-14">۱۴- (ویدیوی نهایی)</option></select></label>
+          <label>پیش‌نمایش از ثانیه<input type="number" id="v_start" value="0" min="0" step="1"></label>
+        </div>
+        <p class="muted small">هر اسلایدر را روی ۰ بگذاری، آن مرحله خاموش است. «بدون پاک‌سازی» یعنی صدا اصلاً دست نمی‌خورد.</p>
+        <div class="row"><button id="v_preview" class="primary">پیش‌نمایش ۱۵ ثانیه</button><button id="v_apply">اعمال روی کل فایل</button></div>
+        <div class="useBox">
+          <div id="v_uses" class="muted"></div>
+          <div class="row"><button id="v_useProject" class="primary">استفاده در ادیت‌های این پروژه</button><button id="v_useBrand" class="ghost">برای همه‌ی پروژه‌ها</button></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>قبل / بعد</h2>
+        <div id="v_result" class="muted">پیش‌نمایش بگیر تا مقایسه کنی.</div>
+        <div id="v_players" hidden>
+          <label>قبل<audio id="v_before" controls preload="none"></audio></label>
+          <label>بعد<audio id="v_after" controls preload="none"></audio></label>
+          <pre id="v_report"></pre>
+        </div>
+        <h3>فایل‌های آماده</h3>
+        <ul id="v_done" class="mini"></ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section id="tab-review" class="tab">
+    <div id="reviewEmpty" class="card"><h2>هنوز چیزی برای بازبینی نیست</h2><p class="muted">وقتی Claude برنامه و استوری‌بورد را آماده کند، این‌جا نمایش داده می‌شود.</p></div>
+    <div id="reviewBody" hidden>
+      <div class="card"><h2>برنامه‌ی ادیت <span id="reviewStage" class="stage"></span></h2><div id="planText" class="plan"></div><div id="cutTable"></div></div>
+      <div id="cards" class="cards"></div>
+      <div class="card">
+        <label>یادداشت کلی<textarea id="generalNote" rows="3" placeholder="مثلاً: همه گرافیک‌ها سه‌بعدی باشند"></textarea></label>
+        <div class="row"><button id="approve" class="primary big">تأیید و ساخت نسخه نهایی ✓</button><button id="requestChanges" class="big">ارسال تغییرات برای Claude</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- OUTPUTS -->
+  <section id="tab-outputs" class="tab">
+    <div id="outList" class="outs"></div>
+    <div class="row"><button class="ghost" data-open="output">باز کردن پوشه خروجی</button></div>
+  </section>
+
+  <!-- LEARN -->
+  <section id="tab-learn" class="tab">
+    <div class="grid2">
+      <div class="card">
+        <h2>چیزی یاد بده</h2>
+        <p class="muted">یادداشت، آموزش، لینک، اسکرین‌شات یا ویدیوی نمونه. Claude با «از آموزش‌ها یاد بگیر» مهارت‌ها را به‌روز می‌کند.</p>
+        <label class="drop" id="learnDrop"><input type="file" multiple hidden><b>فایل‌ها را این‌جا رها کن</b></label>
+        <label>لینک<input id="learnUrl" dir="ltr" placeholder="https://"></label>
+        <label>یادداشت<textarea id="learnNote" rows="4"></textarea></label>
+        <button id="learnSave" class="primary">ذخیره</button>
+      </div>
+      <div class="card"><h2>صندوق آموزش</h2><ul id="learnList" class="mini"></ul></div>
+    </div>
+  </section>
+
+  <!-- GUIDE -->
+  <section id="tab-guide" class="tab">
+    <div class="card guide">
+      <h2>دو راه برای ادیت</h2>
+      <table>
+        <tr><th></th><th>حرفه‌ای — Claude</th><th>سبک — هوش مصنوعی ساده‌تر/رایگان</th></tr>
+        <tr><td>چه کسی</td><td>Claude Code (اپ دسکتاپ یا ترمینال)</td><td>OpenCode، Kilo، Qwen Code، Gemini CLI، Cline و…</td></tr>
+        <tr><td>هزینه</td><td>اشتراک Claude Pro/Max، یا کلید API (پرداخت به اندازه‌ی مصرف)</td><td>رایگان یا خیلی ارزان (مدل‌های رایگان؛ سقف‌ها مدام عوض می‌شوند)</td></tr>
+        <tr><td>نتیجه</td><td>برنامه و استوری‌بورد کامل، پنل تصویرسازی، پنجره‌ی پاپ‌اوت، متن پشت سر، افکت‌های عمق، کنترل کیفیت با دیدن فریم‌ها</td><td>برش مکث‌ها، زیرنویس برند با کلمه‌ی کلیدی، زوم، موزیک، افکت صوتی، کارت CTA</td></tr>
+        <tr><td>کار هوش مصنوعی</td><td>همه‌ی تصمیم‌ها</td><td>فقط اصلاح املای زیرنویس (بقیه را اسکریپت‌ها انجام می‌دهند)</td></tr>
+      </table>
+      <p class="muted">هر دو: اول استوری‌بورد در بازبینی (بدون رندر)، رندر فقط بعد از تأیید تو. ویدیوها روی کامپیوتر خودت می‌مانند؛ فقط متن زیرنویس (و در حالت حرفه‌ای چند عکس کوچک) به هوش مصنوعی فرستاده می‌شود.</p>
+
+      <h3>حالت حرفه‌ای با Claude (پولی)</h3>
+      <ol>
+        <li><b>Claude Code</b> را نصب کن: اپ دسکتاپ Claude (تب Code) یا ترمینال. اشتراک Pro/Max لازم است — یا کلید API از console.anthropic.com.</li>
+        <li>در Claude Code، همین پوشه (<code>mp video skillset</code>) را باز کن. خودش <code>CLAUDE.md</code> و مهارت‌ها را می‌خواند.</li>
+        <li>این‌جا در <b>پروژه</b> فایل‌ها و هدف را بگذار، حالت <b>حرفه‌ای</b> را انتخاب کن، ذخیره را بزن و جمله را برای Claude بفرست.</li>
+        <li>ارزان‌تر: Claude Code را می‌شود به مدل‌های سازگارِ ارزان‌تر (Kimi، GLM، DeepSeek) وصل کرد؛ ضعیف‌تر ولی خیلی کم‌هزینه‌تر.</li>
+      </ol>
+
+      <h3>حالت سبک با ابزارهای رایگان</h3>
+      <table>
+        <tr><th>ابزار</th><th>چیست</th><th>نکته</th></tr>
+        <tr><td><b>OpenCode</b> (پیشنهاد اول)</td><td>اپ دسکتاپ + ترمینال، متن‌باز، چند مدل رایگان</td><td><code>AGENTS.md</code> را خودش می‌خواند</td></tr>
+        <tr><td><b>Kilo</b></td><td>اپ دسکتاپ (بتا)، متن‌باز</td><td>شروع رایگان</td></tr>
+        <tr><td><b>Qwen Code</b> / <b>Gemini CLI</b></td><td>ترمینال</td><td>سقف رایگان دارند؛ <code>QWEN.md</code> و <code>GEMINI.md</code> به AGENTS.md اشاره می‌کنند</td></tr>
+        <tr><td><b>Trae</b></td><td>اپ دسکتاپ (ByteDance)</td><td>پلن رایگان؛ برای کار خصوصی به خاطر تله‌متری توصیه نمی‌شود</td></tr>
+      </table>
+      <ol>
+        <li>یکی را نصب کن و همین پوشه را در آن باز کن.</li>
+        <li>یک مدل خوب در فارسی انتخاب کن (مثلاً Qwen یا DeepSeek یا Gemini).</li>
+        <li>این‌جا حالت <b>سبک</b> را انتخاب کن، ذخیره را بزن و جمله را برای آن هوش مصنوعی بفرست.</li>
+        <li>او سه دستور اجرا می‌کند: <code>prepare</code> → (اصلاح زیرنویس) → <code>storyboard</code>. تو در <b>بازبینی</b> تأیید می‌کنی، بعد <code>render --final</code>.</li>
+      </ol>
+      <p class="muted">اگر هوش مصنوعی گیر کرد، خودت هم می‌توانی همین دستورها را در ترمینال پوشه اجرا کنی:<br>
+      <code>.venv\Scripts\python.exe .claude\skills\pro-edit\lite_edit.py prepare "نام پروژه"</code><br>
+      <code>.venv\Scripts\python.exe .claude\skills\pro-edit\lite_edit.py storyboard "نام پروژه"</code><br>
+      <code>.venv\Scripts\python.exe .claude\skills\pro-edit\lite_edit.py render "نام پروژه" --final</code></p>
+      <p class="muted">متن کامل: <code>mp-studio/docs/GUIDE.md</code></p>
+    </div>
+  </section>
+</main>
+
+<footer id="handoffBar">
+  <span id="handoffText">پروژه‌ای انتخاب نشده</span>
+  <span class="spacer"></span>
+  <button id="sendClaude" class="primary big">ذخیره و آماده برای Claude ✓</button>
+</footer>
+<div id="tellClaude" class="modal" hidden><div class="modalBox">
+  <h2 id="tellTitle">ذخیره شد ✓</h2>
+  <p>حالا برگرد به <b>Claude</b> و این جمله رو بفرست:</p>
+  <div class="row"><input id="tellText" readonly><button id="tellCopy" class="primary">کپی</button></div>
+  <p class="muted">اگه Claude همین الان منتظر باشه، خودش شروع می‌کنه و لازم نیست چیزی بنویسی.</p>
+  <div class="row"><button id="tellClose" class="ghost">باشه</button></div>
+</div></div>
+<div class="credit">MP Studio · ساخته‌شده توسط <a href="https://instagram.com/mohammadpour.bi" target="_blank" rel="noopener">@mohammadpour.bi</a> · MIT</div>
+<script src="studio.js"></script>
+</body>
+</html>
