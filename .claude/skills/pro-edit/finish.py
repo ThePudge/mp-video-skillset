@@ -55,6 +55,7 @@ ap.add_argument("edit_dir", type=Path)
 ap.add_argument("-o", "--output", type=Path, required=True)
 ap.add_argument("--spec", default="fx.json")
 ap.add_argument("--preview", action="store_true", help="fast encode for review")
+ap.add_argument("--master", action="store_true", help="near-lossless master for platform exports (export_insta.py)")
 a = ap.parse_args()
 
 E = a.edit_dir.resolve()
@@ -426,7 +427,7 @@ script = E / "finish.filter.txt"
 script.write_text("\n".join(g), encoding="utf-8")
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from hw import FFMPEG, venc as hw_venc  # GPU encoder for previews when NVENC works here; x264 for the final
-venc = hw_venc("preview" if a.preview else "final")
+venc = hw_venc("preview" if a.preview else "master" if a.master else "final")
 tmp = out.with_suffix(".prenorm.mp4")
 cmd = [FFMPEG, "-hide_banner", "-loglevel", os.environ.get("MP_FFLOG", "error"), "-y", *inputs, "-/filter_complex", script.name,
        "-map", "[vout]", "-map", "[aout]", *venc, "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",

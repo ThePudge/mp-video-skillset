@@ -45,13 +45,16 @@ NVENC = HW == "h264_nvenc"
 
 
 def venc(kind: str = "preview") -> list:
-    if HW and (kind != "final" or os.environ.get("MP_FINAL_GPU")):
+    use_hw = HW and (kind not in ("final", "master") or (kind == "final" and os.environ.get("MP_FINAL_GPU")))
+    if use_hw:
         if HW == "h264_nvenc":
             q = {"draft": ("p1", "30"), "preview": ("p5", "23"), "inter": ("p6", "17"), "final": ("p7", "19")}[kind]
             return ["-c:v", "h264_nvenc", "-preset", q[0], "-tune", "hq", "-rc", "vbr", "-cq", q[1], "-b:v", "0",
                     "-spatial-aq", "1", "-pix_fmt", "yuv420p"]
         q = {"draft": ("veryfast", "30"), "preview": ("faster", "23"), "inter": ("medium", "17"), "final": ("slow", "19")}[kind]
         return ["-c:v", "h264_qsv", "-preset", q[0], "-global_quality", q[1], "-pix_fmt", "nv12"]
+    if kind == "master":  # near-lossless mezzanine for platform exports (export_insta.py), always x264
+        return ["-c:v", "libx264", "-preset", "medium", "-crf", "12", "-threads", "0", "-pix_fmt", "yuv420p"]
     x = {"draft": ("ultrafast", "28"), "preview": ("veryfast", "23"), "inter": ("fast", "18"), "final": ("medium", "18")}[kind]
     return ["-c:v", "libx264", "-preset", x[0], "-crf", x[1], "-threads", "0", "-pix_fmt", "yuv420p"]
 

@@ -76,13 +76,28 @@ def main():
         xc = np.fft.irfft(np.fft.rfft(oa, n) * np.conj(np.fft.rfft(ra, n)), n)[: len(oa) - len(ra) + 1]
         lag_a = (int(np.argmax(xc)) / SR) - 0.5
         err = lag_v - lag_a
-        errs.append(err)
+        sure = max(sc) >= 0.85  # below that the edit changed the picture there (zoom, shift, overlay): no verdict
+        if sure:
+            errs.append(err)
         print(f"{r['source'][-8:]}  edit {t_out:6.2f}s  picture {lag_v * 1000:+5.0f} ms  sound {lag_a * 1000:+5.0f} ms  "
-              f"→ lip-sync error {err * 1000:+5.0f} ms  (picture match {max(sc):.2f})")
+              f"→ lip-sync error {err * 1000:+5.0f} ms  (picture match {max(sc):.2f}{'' if sure else ', skipped: picture changed here'})")
+    # sample count vs picture length: the checks above seek by timestamps, but phones, Instagram and re-encoders
+    # play audio samples in order; extra samples (e.g. AAC priming copied at every join) drift the voice late
+    pk = subprocess.run(["ffprobe", "-v", "error", "-select_streams", "a:0", "-count_packets", "-show_entries",
+                         "stream=nb_read_packets,sample_rate", "-of", "csv=p=0", str(a.video)], capture_output=True, text=True).stdout.strip()
+    vd = float(subprocess.run(["ffprobe", "-v", "error", "-select_streams", "v:0", "-show_entries", "stream=duration", "-of", "csv=p=0",
+                               str(a.video)], capture_output=True, text=True).stdout or 0)
+    extra = 0.0
+    if pk and vd:
+        sr, n = (int(x) for x in pk.split(","))
+        extra = n * 1024 / sr - vd
+        print(f"audio samples {n * 1024 / sr:.3f} s vs picture {vd:.3f} s → {extra * 1000:+.0f} ms "
+              f"({'ok' if abs(extra) <= 0.1 else 'DRIFT on phones / after re-encode'})")
     if errs:
         worst = max(abs(e) for e in errs)
-        print(f"worst error {worst * 1000:.0f} ms → {'IN SYNC (≤ 1 frame)' if worst <= 1.5 / fps else 'OUT OF SYNC'}")
-        sys.exit(0 if worst <= 1.5 / fps else 1)
+        ok = worst <= 1.5 / fps and abs(extra) <= 0.1
+        print(f"worst error {worst * 1000:.0f} ms → {'IN SYNC (≤ 1 frame)' if ok else 'OUT OF SYNC'}")
+        sys.exit(0 if ok else 1)
 
 
 if __name__ == "__main__":

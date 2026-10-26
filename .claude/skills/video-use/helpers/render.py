@@ -418,7 +418,13 @@ def extract_all_segments(
 
 
 def concat_segments(segment_paths: list[Path], out_path: Path, edit_dir: Path) -> None:
-    """Lossless concat via the concat demuxer. No re-encode."""
+    """Concat via the concat demuxer: video copied (no re-encode), audio re-encoded.
+
+    Copying each segment's AAC as is keeps every segment's encoder priming (~21 ms) inside the stream, so
+    the joined file holds more audio samples than its timestamps say; phones, Instagram and any re-encode
+    play the samples in order and the voice drifts behind the picture (0.7 s over 26 segments). Decoding
+    trims the priming per segment, and aresample drops any leftover overlap against the timestamps.
+    """
     out_path.parent.mkdir(parents=True, exist_ok=True)
     concat_list = edit_dir / "_concat.txt"
     concat_list.write_text("".join(f"file '{p.resolve()}'\n" for p in segment_paths))
@@ -427,7 +433,9 @@ def concat_segments(segment_paths: list[Path], out_path: Path, edit_dir: Path) -
         "ffmpeg", "-y",
         "-f", "concat", "-safe", "0",
         "-i", str(concat_list),
-        "-c", "copy",
+        "-c:v", "copy",
+        "-af", "aresample=async=1:min_hard_comp=0.01:first_pts=0",
+        "-c:a", "aac", "-b:a", "256k", "-ar", "48000",
         "-movflags", "+faststart",
         str(out_path),
     ]
